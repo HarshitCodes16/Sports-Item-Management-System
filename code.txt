@@ -1,0 +1,974 @@
+-- table creation:...
+CREATE TABLE Sports_Type (
+    sport_type VARCHAR2(50) PRIMARY KEY
+);
+
+select * from PERFORMANCE_LOG;
+CREATE TABLE Performance_Log (
+    student_id INT,
+    sports_type VARCHAR2(20),
+    staff_id INT,
+    skill_rating DECIMAL(3, 2),
+    attendance_count INT,
+    last_evaluated_date DATE,
+    PRIMARY KEY (student_id, sports_type),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id),
+    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id),
+    FOREIGN KEY (sports_type) REFERENCES Sports_type(sport_type)
+    
+);
+
+CREATE TABLE Shortlist (
+    student_id    NUMBER(10),
+    sports_type   VARCHAR2(30),
+    staff_id      NUMBER(10),
+    selected_date DATE,
+    status        VARCHAR2(20),
+    PRIMARY KEY (student_id, sports_type),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id),
+    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id),
+    FOREIGN KEY (sports_type) REFERENCES Sports_type(sport_type)
+);
+
+CREATE TABLE Fine_Payment (
+    payment_id INT PRIMARY KEY,
+    payment_amount DECIMAL(10, 2),
+    payment_date DATE,
+    return_id INT UNIQUE,
+    FOREIGN KEY (return_id) REFERENCES Return_Record(return_id)
+);
+
+
+CREATE TABLE Return_Record (
+    return_id INT PRIMARY KEY,
+    return_date DATE,
+    fine_amount DECIMAL(10, 2),
+    return_status VARCHAR(20),
+    issue_id INT UNIQUE,
+    FOREIGN KEY (issue_id) REFERENCES Issue_Record(issue_id)
+);
+
+CREATE TABLE Issue_Record (
+    issue_id INT PRIMARY KEY,
+    issue_date DATE,
+    due_date DATE,
+    status VARCHAR(20),
+    student_id INT,
+    item_id INT,
+    FOREIGN KEY (student_id) REFERENCES Student(student_id),
+    FOREIGN KEY (item_id) REFERENCES Item(item_id)
+);
+
+
+CREATE TABLE Item (
+    item_id INT PRIMARY KEY,
+    item_name VARCHAR(100),
+    condition VARCHAR(50),
+    category VARCHAR(50),
+    total_qty INT,
+    available_qty INT
+);
+
+
+CREATE TABLE Staff_Phone (
+    staff_id INT,
+    phone_no VARCHAR(20),
+    PRIMARY KEY (staff_id, phone_no),
+    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id)
+);
+
+CREATE TABLE Staff (
+    staff_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(100)
+);
+
+
+CREATE TABLE Student_Phone (
+    student_id INT,
+    phone_no VARCHAR(20),
+    PRIMARY KEY (student_id, phone_no),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id)
+);
+
+
+CREATE TABLE Student (
+    student_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(100),
+    department VARCHAR(100)
+);
+
+
+SET SERVEROUTPUT ON;
+--important:
+CREATE OR REPLACE PROCEDURE add_new_student_with_phones (
+    p_student_id INT,
+    p_first_name VARCHAR,
+    p_last_name VARCHAR,
+    p_email VARCHAR,
+    p_department VARCHAR,
+    p_phone1 VARCHAR,
+    p_phone2 VARCHAR
+)
+IS
+BEGIN
+    INSERT INTO Student (student_id, first_name, last_name, email, department)
+    VALUES (p_student_id, p_first_name, p_last_name, p_email, p_department);
+
+    INSERT INTO Student_Phone (student_id, phone_no) VALUES (p_student_id, p_phone1);
+    INSERT INTO Student_Phone (student_id, phone_no) VALUES (p_student_id, p_phone2);
+END;
+
+BEGIN
+    add_new_student_with_phones(104, 'Abhinav', 'Patel', 'abhinav.patel@example.com', 'Electrical', '7871234567', '8691234567');
+END;
+
+BEGIN
+    add_new_student_with_phones(102, 'Aryan', 'Patel', 'aryan.patel@example.com', 'Mechanical', '9871234567', '7891234567');
+    add_new_student_with_phones(101, 'Bhavish', 'Pushkarna', 'Bhavish.patel@example.com', 'CSE', '9546123987', '9091234557');
+    add_new_student_with_phones(103, 'Harshit', 'Katyal', 'harshit.katyal@example.com', 'CSE', '8708788914', '8998796544');
+END;
+
+
+select * from student;
+select * from STUDENT order by student_id desc;
+select * from STUDENT_PHONE;
+
+CREATE OR REPLACE PROCEDURE add_new_sports_item (
+    p_item_id INT,
+    p_item_name VARCHAR,
+    p_condition VARCHAR,
+    p_category VARCHAR,
+    p_total_qty INT
+)
+IS
+BEGIN
+    INSERT INTO Item (item_id, item_name, condition, category, total_qty, available_qty)
+    VALUES (p_item_id, p_item_name, p_condition, p_category, p_total_qty, p_total_qty);
+END;
+
+BEGIN
+    add_new_sports_item(204, 'Badminton_Shuttle', 'New', 'Badminton', 10);
+END;
+
+BEGIN
+    -- add_new_sports_item(202, 'Cricket_Bat', 'New', 'Cricket', 20);
+    -- add_new_sports_item(201, 'Badminton_Racket', 'New', 'Badminton', 15);
+    add_new_sports_item(203, 'Cricket_Ball', 'New', 'Cricket', 10);
+END;
+      
+select * from ITEM;
+
+--procedure for Staff insertion
+CREATE OR REPLACE PROCEDURE add_new_staff_with_phones (
+    p_staff_id INT,
+    p_first_name VARCHAR,
+    p_last_name VARCHAR,
+    p_email VARCHAR,
+    p_phone1 VARCHAR,
+    p_phone2 VARCHAR
+)
+IS
+BEGIN
+    INSERT INTO Staff (staff_id, first_name, last_name, email)
+    VALUES (p_staff_id, p_first_name, p_last_name, p_email);
+
+    INSERT INTO Staff_Phone (staff_id, phone_no) VALUES (p_staff_id, p_phone1);
+    INSERT INTO Staff_Phone (staff_id, phone_no) VALUES (p_staff_id, p_phone2);
+END;
+
+BEGIN
+    add_new_staff_with_phones(305, 'Naman', 'Kumar', 'naman.kumar@example.com', '7488001122', '6977665544');
+END;
+
+BEGIN
+    add_new_staff_with_phones(302, 'Neha', 'Reddy', 'neha.reddy@example.com', '9988001122', '8877665544');
+END;
+
+select * from staff;
+select * from STAFF_PHONE;
+
+
+
+BEGIN
+    issue_item_to_student(
+         401,          -- Unique ID for the issue record
+         101,         -- Existing student_id
+        201,         -- Existing item_id (e.g., Badminton racket)
+        TO_DATE('2025-05-05', 'YYYY-MM-DD')  -- Due date
+    );
+END;
+--important finish...
+--not important starts..
+DROP PROCEDURE issue_item_to_student;
+ALTER TABLE Return_Record
+ADD return_status VARCHAR2(20);
+
+DELETE FROM ISSUE_RECORD;
+--important starts here...
+CREATE SEQUENCE return_id_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE issue_id_seq
+    START WITH 1000
+    INCREMENT BY 1
+    NOCACHE;
+--procedure for issue record
+CREATE OR REPLACE PROCEDURE issue_item_to_student (
+    p_student_id  INT,
+    p_item_id     INT
+)
+IS
+    v_available          INT;
+    v_new_issue_id    INT;
+    v_item_in_use        INT;
+    v_student_overdue    INT;
+BEGIN
+     SELECT issue_id_seq.NEXTVAL INTO v_new_issue_id FROM dual;
+    
+    --  Check if item is currently issued and not returned
+    SELECT COUNT(*) INTO v_item_in_use
+    FROM Return_Record rr
+    JOIN Issue_Record ir ON rr.issue_id = ir.issue_id
+    WHERE ir.item_id = p_item_id
+      AND rr.return_status = 'Not Returned';
+
+    IF v_item_in_use > 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'This item is already issued and not yet returned.');
+    END IF;
+
+    --  Check if student has other items not returned from previous day
+    SELECT COUNT(*) INTO v_student_overdue
+    FROM Return_Record rr
+    JOIN Issue_Record ir ON rr.issue_id = ir.issue_id
+    WHERE ir.student_id = p_student_id
+      AND TRUNC(ir.issue_date) <> TRUNC(SYSDATE)
+      AND rr.return_status = 'Not Returned';
+
+    IF v_student_overdue > 0 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Student has unreturned item(s) from previous days.');
+    END IF;
+
+    -- Check item availability
+    SELECT available_qty INTO v_available
+    FROM Item
+    WHERE item_id = p_item_id;
+
+    IF v_available <= 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Item not available.');
+    END IF;
+
+    --  Insert into Issue_Record
+    INSERT INTO Issue_Record(issue_id, issue_date, due_date, status, student_id, item_id)
+    VALUES (v_new_issue_id, SYSDATE, SYSDATE + 1, 'Issued', p_student_id, p_item_id);
+
+    --  Update available quantity
+    UPDATE Item
+    SET available_qty = available_qty - 1
+    WHERE item_id = p_item_id;
+
+    -- Insert into Return_Record with status 'Not Returned'
+    INSERT INTO Return_Record(return_id, return_date, fine_amount, return_status, issue_id)
+    VALUES (
+        return_id_seq.NEXTVAL,
+        NULL,             -- return_date is NULL until returned
+        0.00,             -- fine is 0 initially
+        'Not Returned',
+        v_new_issue_id
+    );
+
+      DBMS_OUTPUT.PUT_LINE('Item issued successfully with Issue ID: ' || v_new_issue_id);
+END;
+/
+--calling
+DECLARE
+    -- Declare the input parameters for the procedure
+    v_student_id  INT := 104;    -- Example student_id, replace with the actual value
+    v_item_id     INT := 201;    -- Example item_id, replace with the actual value
+BEGIN
+    -- Call the issue_item_to_student procedure
+    issue_item_to_student(p_student_id => v_student_id, p_item_id => v_item_id);
+END;
+
+select * from ISSUE_RECORD;
+select * from student;
+select * from return_record;
+
+--this one is old one...
+--procedure for return item
+CREATE OR REPLACE PROCEDURE return_item_from_student (
+    p_issue_id INT
+)
+IS
+    v_return_status   VARCHAR2(20);
+    v_due_date        DATE;
+    v_return_date     DATE := TRUNC(SYSDATE);
+    v_fine_amount     NUMBER := 0;
+    v_payment_id      INT;
+    v_item_id         INT;
+    v_return_id       INT;
+BEGIN
+    --  Check if item is already returned
+    SELECT return_status INTO v_return_status
+    FROM return_record
+    WHERE issue_id = p_issue_id;
+
+    IF v_return_status = 'Returned' THEN
+        RAISE_APPLICATION_ERROR(-20006, 'This item has already been returned.');
+    END IF;
+
+    --  Get due date and item_id from Issue_Record
+    SELECT due_date, item_id INTO v_due_date, v_item_id
+    FROM issue_record
+    WHERE issue_id = p_issue_id;
+
+    --  Calculate fine (Rs.10 per late day)
+    IF v_return_date > TRUNC(v_due_date) THEN
+        v_fine_amount := 10 * (v_return_date - TRUNC(v_due_date));
+    END IF;
+
+    -- Update Return_Record to mark as Returned
+    UPDATE return_record
+    SET return_date = v_return_date,
+        fine_amount = v_fine_amount,
+        return_status = 'Returned'
+    WHERE issue_id = p_issue_id;
+
+    -- Get corresponding return_id
+    SELECT return_id INTO v_return_id
+    FROM return_record
+    WHERE issue_id = p_issue_id;
+
+    -- Update available quantity in Sports_Item
+    UPDATE item
+    SET available_qty = available_qty + 1
+    WHERE item_id = v_item_id;
+
+    -- Insert fine if applicable
+    IF v_fine_amount > 0 THEN
+        SELECT NVL(MAX(payment_id), 0) + 1 INTO v_payment_id FROM fine_payment;
+
+        INSERT INTO fine_payment (payment_id, payment_amount, payment_date, return_id, status)
+        VALUES (v_payment_id, v_fine_amount, v_return_date, v_return_id, 'UNPAID');
+    END IF;
+
+    DBMS_OUTPUT.PUT_LINE('Item returned successfully. Fine: Rs. ' || v_fine_amount);
+END;
+/
+
+--check this ...
+--- new Updated return procedure...
+CREATE OR REPLACE PROCEDURE return_item_from_student1 (
+    p_issue_id   IN  INT,
+    p_return_id  OUT INT
+)
+IS
+    v_return_status   VARCHAR2(20);
+    v_due_date        DATE;
+    v_return_date     DATE := TRUNC(SYSDATE);
+    v_fine_amount     NUMBER := 0;
+    v_payment_id      INT;
+    v_item_id         INT;
+BEGIN
+    -- Check if item is already returned
+    SELECT return_status INTO v_return_status
+    FROM return_record
+    WHERE issue_id = p_issue_id;
+
+    IF v_return_status = 'Returned' THEN
+        RAISE_APPLICATION_ERROR(-20006, 'This item has already been returned.');
+    END IF;
+
+    -- Get due date and item_id from Issue_Record
+    SELECT due_date, item_id INTO v_due_date, v_item_id
+    FROM issue_record
+    WHERE issue_id = p_issue_id;
+
+    -- Calculate fine (Rs.10 per late day)
+    IF v_return_date > TRUNC(v_due_date) THEN
+        v_fine_amount := 10 * (v_return_date - TRUNC(v_due_date));
+    END IF;
+
+    -- Update Return_Record to mark as Returned
+    UPDATE return_record
+    SET return_date = v_return_date,
+        fine_amount = v_fine_amount,
+        return_status = 'Returned'
+    WHERE issue_id = p_issue_id;
+
+    -- Get corresponding return_id
+    SELECT return_id INTO p_return_id
+    FROM return_record
+    WHERE issue_id = p_issue_id;
+
+    -- Update available quantity in Sports_Item
+    UPDATE item
+    SET available_qty = available_qty + 1
+    WHERE item_id = v_item_id;
+
+    -- Insert fine if applicable
+    IF v_fine_amount > 0 THEN
+        SELECT NVL(MAX(payment_id), 0) + 1 INTO v_payment_id FROM fine_payment;
+
+        INSERT INTO fine_payment (payment_id, payment_amount, payment_date, return_id, status)
+        VALUES (v_payment_id, v_fine_amount, v_return_date, p_return_id, 'UNPAID');
+    END IF;
+
+    DBMS_OUTPUT.PUT_LINE('Item returned successfully.');
+    DBMS_OUTPUT.PUT_LINE('Return ID: ' || p_return_id);
+    DBMS_OUTPUT.PUT_LINE('Fine: Rs. ' || v_fine_amount);
+END;
+/
+
+
+--calling
+DECLARE
+    -- Declare the input parameter for the procedure
+    v_issue_id INT := 1006;  -- Example issue ID, replace with the actual value
+BEGIN
+    -- Call the return_item_from_student procedure
+    return_item_from_student(p_issue_id => v_issue_id);
+END;
+/
+CREATE OR REPLACE PROCEDURE delete_item (
+    p_item_id IN NUMBER
+)
+IS
+    v_count NUMBER;
+BEGIN
+    -- Check if the item is currently issued (not yet returned)
+    SELECT COUNT(*) INTO v_count
+    FROM issue_record ir
+    JOIN return_record rr ON ir.issue_id = rr.issue_id
+    WHERE ir.item_id = p_item_id AND rr.return_status = 'Not Returned';
+
+    IF v_count > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Cannot delete Item ID: ' || p_item_id || '. It is currently issued and not yet returned.');
+    ELSE
+        -- Delete the item
+        DELETE FROM item
+        WHERE item_id = p_item_id;
+
+        IF SQL%ROWCOUNT = 0 THEN
+            DBMS_OUTPUT.PUT_LINE('Item ID: ' || p_item_id || ' does not exist.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Item ID: ' || p_item_id || ' has been successfully deleted.');
+        END IF;
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error while deleting Item ID: ' || p_item_id || '. Error: ' || SQLERRM);
+END;
+/
+
+DECLARE
+    id NUMBER;
+BEGIN
+    id := 201;
+    delete_item(id);
+END;
+/
+select * from item;
+
+
+select * from issue_record;
+-- again important starts..
+
+--procedure for fine payment
+CREATE OR REPLACE PROCEDURE pay_fine (
+    p_return_id INT
+)
+IS
+BEGIN
+    UPDATE fine_payment
+    SET status = 'PAID',
+        payment_date = TRUNC(SYSDATE)
+    WHERE return_id = p_return_id;
+
+    DBMS_OUTPUT.PUT_LINE('Fine marked as paid.');
+END;
+/
+
+--calling
+DECLARE
+    -- Declare the input parameter for the procedure
+    v_return_id INT := 141;  -- Example return_id, replace with the actual value
+BEGIN
+    -- Call the pay_fine procedure
+    pay_fine(p_return_id => v_return_id);
+END;
+/
+
+--not important starts here
+select * from STUDENT;
+select * from ISSUE_RECORD;
+select * from FINE_PAYMENT;
+select * from RETURN_RECORD;
+select * from ITEM;
+--not important ends here..
+
+-- again important starts..
+
+--very important...
+CREATE OR REPLACE PROCEDURE display_cursor(p_cursor IN SYS_REFCURSOR) IS
+    v_col_cnt       INTEGER;
+    v_desc_tab      DBMS_SQL.DESC_TAB;
+    v_col_val       VARCHAR2(4000);
+    v_cursor_id     INTEGER;
+    v_cursor        SYS_REFCURSOR := p_cursor;  -- Local copy
+    v_found         BOOLEAN := FALSE;  
+BEGIN
+    v_cursor_id := DBMS_SQL.TO_CURSOR_NUMBER(v_cursor);
+    DBMS_SQL.DESCRIBE_COLUMNS(v_cursor_id, v_col_cnt, v_desc_tab);
+
+    FOR i IN 1 .. v_col_cnt LOOP
+        DBMS_SQL.DEFINE_COLUMN(v_cursor_id, i, v_col_val, 4000);
+    END LOOP;
+
+    WHILE DBMS_SQL.FETCH_ROWS(v_cursor_id) > 0 LOOP
+        v_found := TRUE; 
+        FOR i IN 1 .. v_col_cnt LOOP
+            DBMS_SQL.COLUMN_VALUE(v_cursor_id, i, v_col_val);
+            DBMS_OUTPUT.PUT(v_desc_tab(i).col_name || ': ' || v_col_val || ' | ');
+        END LOOP;
+        DBMS_OUTPUT.NEW_LINE;
+    END LOOP;
+
+    
+    IF NOT v_found THEN
+        DBMS_OUTPUT.PUT_LINE('No data found.');
+    END IF;
+
+    DBMS_SQL.CLOSE_CURSOR(v_cursor_id);
+END;
+/
+
+
+
+CREATE OR REPLACE PROCEDURE run_named_cursor(p_cursor_name IN VARCHAR2) IS
+    v_cursor SYS_REFCURSOR;
+BEGIN
+    CASE UPPER(TRIM(p_cursor_name))
+    
+        WHEN 'OVERDUE_STUDENTS' THEN
+            OPEN v_cursor FOR
+                SELECT s.student_id, s.first_name || ' ' || s.last_name AS student_name,
+                       i.item_name, ir.due_date
+                FROM student s
+                JOIN issue_record ir ON s.student_id = ir.student_id
+                JOIN return_record rr ON ir.issue_id = rr.issue_id
+                JOIN item i ON ir.item_id = i.item_id
+                WHERE rr.return_status = 'Not Returned'
+                AND ir.due_date < TRUNC(SYSDATE);
+                --  AND ir.due_date >= TRUNC(SYSDATE);
+
+        WHEN 'LOW_STOCK_ITEMS' THEN
+            OPEN v_cursor FOR
+                SELECT item_id, item_name, available_qty
+                FROM item
+                WHERE available_qty < 5;
+
+        WHEN 'UNPAID_FINES' THEN
+            OPEN v_cursor FOR
+                SELECT fp.payment_id, fp.payment_amount, fp.status, s.first_name || ' ' || s.last_name AS student_name
+                FROM fine_payment fp
+                JOIN return_record rr ON fp.return_id = rr.return_id
+                JOIN issue_record ir ON rr.issue_id = ir.issue_id
+                JOIN student s ON ir.student_id = s.student_id
+                WHERE fp.status = 'UNPAID';
+
+        WHEN 'MOST_USED_ITEMS' THEN
+            OPEN v_cursor FOR
+                SELECT i.item_id, i.item_name, COUNT(ir.item_id) AS times_issued
+                FROM issue_record ir
+                JOIN item i ON ir.item_id = i.item_id
+                GROUP BY i.item_id, i.item_name
+                ORDER BY times_issued DESC;
+
+        WHEN 'STUDENT_ISSUE_HISTORY' THEN
+            OPEN v_cursor FOR
+                SELECT s.student_id, s.first_name || ' ' || s.last_name AS student_name,
+                       i.item_name, ir.issue_date, rr.return_date
+                FROM student s
+                JOIN issue_record ir ON s.student_id = ir.student_id
+                JOIN item i ON ir.item_id = i.item_id
+                JOIN return_record rr ON ir.issue_id = rr.issue_id
+                ORDER BY s.student_id, ir.issue_date;
+
+        WHEN 'SHORTLISTED_STUDENTS' THEN
+            OPEN v_cursor FOR
+                SELECT s.student_id,
+                       s.first_name || ' ' || s.last_name AS student_name,
+                       st.first_name || ' ' || st.last_name AS staff_name,
+                       sh.SPORTS_TYPE,
+                       sh.selected_date,
+                       sh.status
+                FROM Shortlist sh
+                JOIN Student s ON sh.student_id = s.student_id
+                JOIN Staff st ON sh.staff_id = st.staff_id
+                ORDER BY sh.selected_date DESC;
+
+         WHEN 'PERFORMANCE_LOG' THEN
+    OPEN v_cursor FOR
+        SELECT s.student_id,
+               s.first_name || ' ' || s.last_name AS student_name,
+               st.staff_id,
+               st.first_name || ' ' || st.last_name AS staff_name,
+               pl.sports_type,
+               pl.skill_rating,
+               pl.attendance_count,
+               pl.last_evaluated_date
+        FROM Performance_Log pl
+        JOIN Student s ON pl.student_id = s.student_id
+        JOIN Staff st ON pl.staff_id = st.staff_id
+        ORDER BY pl.last_evaluated_date DESC;
+
+        
+        WHEN 'ALL_ITEMS' THEN
+            OPEN v_cursor FOR
+                SELECT item_id,
+                       item_name,
+                       category,
+                       available_qty,
+                       total_qty,
+                       condition
+                FROM Item
+                ORDER BY item_name;
+
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Invalid cursor name: ' || p_cursor_name);
+            RETURN;
+    END CASE;
+
+    
+    display_cursor(v_cursor);
+END;
+/
+
+
+-- only alling for debugging and alterating purposes...
+BEGIN
+    run_named_cursor('overdue_students');
+END;
+/
+
+
+BEGIN
+    run_named_cursor('low_stock_items');
+END;
+
+BEGIN
+    RUN_NAMED_CURSOR('student_issue_history');
+END;
+/
+
+BEGIN
+    RUN_NAMED_CURSOR('performance_log');
+END;
+
+
+
+drop PROCEDURE Add_Performance_Log;
+
+
+-- debugging
+select * from staff;
+select * from PERFORMANCE_LOG;
+--ends 
+
+--important 
+
+alter table Shortlist add sports_type varchar2(20);
+
+--on delete cascade
+-- debugging only...
+DELETE FROM Fine_Payment;
+DELETE FROM Return_Record;
+DELETE FROM Shortlist;
+DELETE FROM Performance_Log;
+DELETE FROM Issue_Record;
+DELETE FROM STUDENT_PHONE;
+delete from Student;
+DELETE FROM ITEM;
+DELETE FROM STAFF_PHONE;
+delete from staff;
+
+select * from ISSUE_RECORD;
+select * from Student;
+select * from staff;
+
+select * from student;
+select * from item;
+
+select * from ISSUE_RECORD;
+select * from RETURN_RECORD;
+select * from PERFORMANCE_LOG;
+select * from SHORTLIST;
+-- degungging ended...
+
+--bhavish Important...
+drop table Performance_log;
+drop table Shortlist;
+
+
+
+CREATE OR REPLACE PROCEDURE add_or_update_performance_log (
+    p_student_id        IN INT,
+    p_sports_type       IN VARCHAR2,
+    p_staff_id          IN INT,
+    p_skill_rating      IN NUMBER,
+    p_attendance_count  IN INT
+)
+IS
+    v_exists NUMBER;
+BEGIN
+    -- Check if student + sports_type already exists
+    SELECT COUNT(*)
+    INTO v_exists
+    FROM Performance_Log
+    WHERE student_id = p_student_id
+      AND sports_type = p_sports_type;
+
+    IF v_exists > 0 THEN
+        -- Update existing performance log
+        UPDATE Performance_Log
+        SET staff_id = p_staff_id,
+            skill_rating = p_skill_rating,
+            attendance_count = p_attendance_count,
+            last_evaluated_date = SYSDATE
+        WHERE student_id = p_student_id
+          AND sports_type = p_sports_type;
+
+        DBMS_OUTPUT.PUT_LINE('Performance log updated for student ' || p_student_id || ' in ' || p_sports_type || '.');
+
+    ELSE
+        -- Insert new performance log
+        INSERT INTO Performance_Log (
+            student_id,
+            sports_type,
+            staff_id,
+            skill_rating,
+            attendance_count,
+            last_evaluated_date
+        ) VALUES (
+            p_student_id,
+            p_sports_type,
+            p_staff_id,
+            p_skill_rating,
+            p_attendance_count,
+            SYSDATE
+        );
+
+        DBMS_OUTPUT.PUT_LINE('Performance log added for student ' || p_student_id || ' in ' || p_sports_type || '.');
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in procedure: ' || SQLERRM);
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER trg_manage_shortlist
+AFTER INSERT OR UPDATE ON Performance_Log
+FOR EACH ROW
+DECLARE
+    v_exists NUMBER;
+BEGIN
+    -- Check if the student is already shortlisted for this sports type
+    SELECT COUNT(*)
+    INTO v_exists
+    FROM Shortlist
+    WHERE student_id = :NEW.student_id
+      AND sports_type = :NEW.sports_type;
+
+    IF :NEW.skill_rating >= 8 THEN
+        IF v_exists = 0 THEN
+            -- Insert new Shortlist entry
+            INSERT INTO Shortlist (
+                student_id,
+                sports_type,
+                staff_id,
+                selected_date,
+                status
+            ) VALUES (
+                :NEW.student_id,
+                :NEW.sports_type,
+                :NEW.staff_id,
+                SYSDATE,
+                'Selected'
+            );
+            DBMS_OUTPUT.PUT_LINE('Student ' || :NEW.student_id || ' added to shortlist for ' || :NEW.sports_type || '.');
+        ELSE
+            -- Update existing Shortlist entry
+            UPDATE Shortlist
+            SET staff_id = :NEW.staff_id,
+                selected_date = SYSDATE,
+                status = 'Selected'
+            WHERE student_id = :NEW.student_id
+              AND sports_type = :NEW.sports_type;
+            DBMS_OUTPUT.PUT_LINE('Student ' || :NEW.student_id || ' shortlist updated for ' || :NEW.sports_type || '.');
+        END IF;
+
+    ELSE
+        -- If skill rating is below 8 and student is already shortlisted, mark as 'Removed'
+        IF v_exists > 0 THEN
+            UPDATE Shortlist
+            SET status = 'Removed',
+                selected_date = SYSDATE
+            WHERE student_id = :NEW.student_id
+              AND sports_type = :NEW.sports_type;
+            DBMS_OUTPUT.PUT_LINE('Student ' || :NEW.student_id || ' removed from shortlist for ' || :NEW.sports_type || ' (rating dropped).');
+        END IF;
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in trigger: ' || SQLERRM);
+END;
+/
+
+
+-- debugging only...
+BEGIN
+    add_new_student_with_phones(
+        p_student_id   => 1,
+        p_first_name   => 'Rahul',
+        p_last_name    => 'Sharma',
+        p_email        => 'rahul.sharma@example.com',
+        p_department   => 'Physical Education',
+        p_phone1       => '9876543210',
+        p_phone2       => '8765432109'
+    );
+END;
+/
+
+BEGIN
+    add_new_student_with_phones(
+        p_student_id   => 2,
+        p_first_name   => 'Aman',
+        p_last_name    => 'Verma',
+        p_email        => 'aman.verma@example.com',
+        p_department   => 'Science',
+        p_phone1       => '9123456780',
+        p_phone2       => '9012345678'
+    );
+END;
+/
+
+BEGIN
+    add_new_staff_with_phones(
+        p_staff_id     => 100,
+        p_first_name   => 'Vikram',
+        p_last_name    => 'Singh',
+        p_email        => 'vikram.singh@example.com',
+        p_phone1       => '9898989898',
+        p_phone2       => '9797979797'
+    );
+END;
+/
+
+BEGIN
+    add_new_staff_with_phones(
+        p_staff_id     => 102,
+        p_first_name   => 'Arjun',
+        p_last_name    => 'Patel',
+        p_email        => 'arjun.patel@example.com',
+        p_phone1       => '9494949494',
+        p_phone2       => '9393939393'
+    );
+END;
+/
+
+BEGIN
+    add_or_update_performance_log(
+        p_student_id       => 103,
+        p_sports_type      => 'Badminton',
+        p_staff_id         => 302,
+        p_skill_rating     => 9.5,
+        p_attendance_count => 10
+    );
+END;
+/
+
+BEGIN
+    add_or_update_performance_log(
+        p_student_id       => 2,
+        p_sports_type      => 'Football',
+        p_staff_id         => 102,
+        p_skill_rating     => 7.0,
+        p_attendance_count => 8
+    );
+END;
+/
+BEGIN
+    add_or_update_performance_log(
+        p_student_id       => 2,
+        p_sports_type      => 'Football',
+        p_staff_id         => 102,
+        p_skill_rating     => 8.2,
+        p_attendance_count => 12
+    );
+END;
+/
+
+BEGIN
+    add_or_update_performance_log(
+        p_student_id       => 104,
+        p_sports_type      => 'Tennis',
+        p_staff_id         => 102,
+        p_skill_rating     => 8.8,
+        p_attendance_count => 12
+    );
+END;
+/
+select * from shortlist;
+select * from STUDENT;
+
+
+drop procedure shortlist_student;
+-- debugging  ends here...
+
+CREATE OR REPLACE PROCEDURE add_sports_type (
+    p_sport_type VARCHAR2
+)
+IS
+    v_exists NUMBER;
+BEGIN
+    -- Check if the sport type already exists
+    SELECT COUNT(*) INTO v_exists
+    FROM Sports_Type
+    WHERE LOWER(sport_type) = LOWER(p_sport_type);
+
+    IF v_exists > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Sport type "' || p_sport_type || '" already exists.');
+    ELSE
+        INSERT INTO Sports_Type (sport_type)
+        VALUES (INITCAP(p_sport_type));
+        
+        DBMS_OUTPUT.PUT_LINE('Sport type "' || INITCAP(p_sport_type) || '" added successfully.');
+    END IF;
+END;
+/
+
+BEGIN
+    add_sports_type('Table_Tennis');
+END;
+/
+
+BEGIN
+    add_sports_type('Basketball');
+    add_sports_type('Football');
+    add_sports_type('Badminton');
+END;
+/
+ALTER TABLE performance_log
+ADD CONSTRAINT fk_performance_sport_type
+FOREIGN KEY (sports_type)
+REFERENCES sports_type(sport_type);
+ALTER TABLE SHORTLIST
+ADD CONSTRAINT fk_shortlist
+FOREIGN KEY (sports_type)
+REFERENCES sports_type(sport_type);
